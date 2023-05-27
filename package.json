@@ -1,0 +1,20 @@
+{
+  "name": "insanify-backend",
+  "version": "1.0.0",
+  "description": "Backend for insanify application.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.2.1",
+    "@types/pg": "^8.6.6",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "pg": "^8.11.0"
+  }
+}
