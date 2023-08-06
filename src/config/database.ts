@@ -1,6 +1,6 @@
 import {Client} from 'pg';
 
-export const client = new Client({
+const dbClient = new Client({
     host: 'localhost',
     port: 5432,
     user: 'postgres',           //get user name from github
@@ -8,8 +8,10 @@ export const client = new Client({
     database: 'postgres'        //get DB name
 })
 
-client.connect().then((res)=>{
+dbClient.connect().then((res)=>{
     console.log('DB Connected');
 }).catch((err)=>{
     console.log('DB connection Error: ', err);
 });
+
+export default dbClient;
