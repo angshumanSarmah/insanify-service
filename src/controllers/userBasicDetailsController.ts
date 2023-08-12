@@ -5,6 +5,12 @@ import { Request, Response } from 'express';
 
 export const createUserBasicDetails = async (req: Request, res: Response) => {
     try {
+        
+        //this check is already present in the middleware, still another layer 
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+
         const { id, first_name, last_name, email_id, user_name, contact_number, country_code } = req.body;
         const data: UserBasicDetails = {
             id,
@@ -60,6 +66,11 @@ export const createUserBasicDetailsForDB = async (data: UserBasicDetails): Promi
 
 export const updateUserBasicDetails = async (req: Request, res: Response) => {
     try {
+        
+        //this check is already present in the middleware, still another layer 
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const { id, first_name, last_name, email_id, user_name, contact_number, country_code } = req.body;
         const data: UserBasicDetails = {
             id,
@@ -129,6 +140,11 @@ export const updateUserBasicDetailsForDB = async (data: UserBasicDetails): Promi
 // ************************************GET API*********************************************
 export const getUserBasicDetails = async (req: Request, res: Response) => {
     try {
+        
+        //this check is already present in the middleware, still another layer 
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const { id } = req.query;
 
         const detail = await getUserBasicDetailsFromDB(id as string);
@@ -166,4 +182,54 @@ export const getUserBasicDetailsFromDB = async (id: string): Promise<UserBasicDe
     } catch (error) {
         throw error;
     }
+};
+
+
+// ***************************************GET with email****************************************
+export const getUserBasicDetailByEmail = async (email: string): Promise<UserBasicDetails | null> => {
+    // let client: PoolClient | null = null;
+    try {
+
+        const query = 'SELECT * FROM user_basic_details WHERE email_id = $1 LIMIT 1';
+        const values = [email];
+
+        const result = await dbClient.query(query, values);
+
+        if (result.rows.length > 0) {
+            return result.rows[0];
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error('Error retrieving user basic detail:', error);
+        throw error;
+    } 
+    // finally {
+    //     if (client) {
+    //         client.release();
+    //     }
+    // }
+};
+
+// *************************************check if email exists*****************************
+export const checkIfEmailExists = async (email: string): Promise<UserBasicDetails | null> => {
+    // let client: PoolClient | null = null;
+    try {
+
+        const query = 'SELECT EXISTS(SELECT 1 FROM user_basic_details WHERE email_id = $1)';
+        const values = [email];
+
+        const result = await dbClient.query(query, values);
+
+        return result.rows[0].exists;
+
+    } catch (error) {
+        console.error('Error checking email existence:', error);
+        throw error;
+    } 
+    // finally {
+    //     if (client) {
+    //         client.release();
+    //     }
+    // }
 };

@@ -4,6 +4,11 @@ import dbClient from '../config/database';
 
 export const createSocialMediaDetail = async (req: Request, res: Response) => {
     try {
+        //this check is already present in the middleware, still another layer 
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+
         const { user_id, social_media } = req.body;
 
         const data: SocialMediaDetail = {
@@ -65,6 +70,12 @@ export const createSocialMediaDetailForDB = async (data: SocialMediaDetail): Pro
 // *******************************************DELETE SOCIAL MEDIA DETAIL*****************************************************
 export const deleteSocialMediaDetail = async (req: Request, res: Response) => {
     try {
+        
+        //this check is already present in the middleware, still another layer 
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+
         const { user_id, social_media_type } = req.body;
 
         const deletedDetail = await deleteSocialMediaDetailFromDB(user_id, social_media_type);
@@ -106,6 +117,11 @@ export const deleteSocialMediaDetailFromDB = async (user_id: string, social_medi
 
 export const getSocialMediaDetail = async (req: Request, res: Response) => {
     try {
+        //this check is already present in the middleware, still another layer 
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+
         const { user_id, social_media_type } = req.query;
 
         const detail = await getSocialMediaDetailFromDB(user_id as string, social_media_type as SocialMediaTypes);
@@ -121,10 +137,10 @@ export const getSocialMediaDetail = async (req: Request, res: Response) => {
     }
 };
 
-export const getSocialMediaDetailFromDB = async (user_id: string, social_media_type: SocialMediaTypes): Promise<SocialMediaPlatformDetails | null> => {
+export const getSocialMediaDetailFromDB = async (user_id: string, social_media_type?: SocialMediaTypes): Promise<SocialMediaPlatformDetails | null> => {
     try {
         const query = `
-            SELECT ${social_media_type}
+            SELECT ${social_media_type || '*'}
             FROM social_media_details
             WHERE user_id = $1;
         `;
@@ -133,7 +149,10 @@ export const getSocialMediaDetailFromDB = async (user_id: string, social_media_t
         const result = await dbClient.query(query, values);
 
         if (result.rows.length > 0) {
-            return result.rows[0][social_media_type];
+            if(social_media_type) {
+                return result.rows[0][social_media_type];
+            }
+            return result.rows[0];
         }
 
         return null;

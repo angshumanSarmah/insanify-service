@@ -108,5 +108,5 @@
   },
 
   
-  "include": ["src/**/*"]     //telling TSC where to find our code
+  "include": ["src/**/*", "@types"]     //telling TSC where to find our code
 }

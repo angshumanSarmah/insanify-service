@@ -30,68 +30,78 @@ export const createUserProfileDetailsForDB = async (data: UserProfileDetails): P
 };
 
 export const createUserProfileDetails = async (req: Request, res: Response) => {
-  try {
-      const { user_id, company, speciality, daily_reach, total_posts, about, country, address, previous_collaborations } = req.body;
-      const data: UserProfileDetails = {
-          user_id,
-          company,
-          speciality,
-          daily_reach,
-          total_posts,
-          about,
-          country,
-          address,
-          previous_collaborations
-      };
+    try {
 
-      const createdDetail = await createUserProfileDetailsForDB(data);
+        //this check is already present in the middleware, still another layer 
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        const { user_id, company, speciality, daily_reach, total_posts, about, country, address, previous_collaborations } = req.body;
+        const data: UserProfileDetails = {
+            user_id,
+            company,
+            speciality,
+            daily_reach,
+            total_posts,
+            about,
+            country,
+            address,
+            previous_collaborations
+        };
 
-      res.status(201).json({
-          message: 'User profile details created successfully',
-          data: createdDetail,
-      });
-  } catch (error) {
-      console.error('Error creating user profile details:', error);
-      res.status(500).json({ message: 'Error creating user profile details' });
-  }
+        const createdDetail = await createUserProfileDetailsForDB(data);
+
+        res.status(201).json({
+            message: 'User profile details created successfully',
+            data: createdDetail,
+        });
+    } catch (error) {
+        console.error('Error creating user profile details:', error);
+        res.status(500).json({ message: 'Error creating user profile details' });
+    }
 };
 
 
 // *************************************UPDATE API*****************************************
 export const updateUserProfileDetails = async (req: Request, res: Response) => {
-  try {
-      const { user_id, company, speciality, daily_reach, total_posts, about, country, address, previous_collaborations } = req.body;
-      const data: UserProfileDetails = {
-          user_id,
-          company,
-          speciality,
-          daily_reach,
-          total_posts,
-          about,
-          country,
-          address,
-          previous_collaborations
-      };
+    try {
 
-      const updatedDetail = await updateUserProfileDetailsForDB(data);
+        //this check is already present in the middleware, still another layer 
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
+        const { user_id, company, speciality, daily_reach, total_posts, about, country, address, previous_collaborations } = req.body;
+        const data: UserProfileDetails = {
+            user_id,
+            company,
+            speciality,
+            daily_reach,
+            total_posts,
+            about,
+            country,
+            address,
+            previous_collaborations
+        };
 
-      if (updatedDetail) {
-          res.status(200).json({
-              message: 'User profile details updated successfully',
-              data: updatedDetail,
-          });
-      } else {
-          res.status(404).json({ message: 'User profile details not found' });
-      }
-  } catch (error) {
-      console.error('Error updating user profile details:', error);
-      res.status(500).json({ message: 'Error updating user profile details' });
-  }
+        const updatedDetail = await updateUserProfileDetailsForDB(data);
+
+        if (updatedDetail) {
+            res.status(200).json({
+                message: 'User profile details updated successfully',
+                data: updatedDetail,
+            });
+        } else {
+            res.status(404).json({ message: 'User profile details not found' });
+        }
+    } catch (error) {
+        console.error('Error updating user profile details:', error);
+        res.status(500).json({ message: 'Error updating user profile details' });
+    }
 };
 
 export const updateUserProfileDetailsForDB = async (data: UserProfileDetails): Promise<UserProfileDetails | null> => {
-  try {
-      const query = `
+    try {
+        const query = `
           UPDATE user_profile_details
           SET
               company = $2,
@@ -106,34 +116,39 @@ export const updateUserProfileDetailsForDB = async (data: UserProfileDetails): P
           RETURNING *;
       `;
 
-      const values = [
-          data.user_id,
-          data.company,
-          data.speciality,
-          data.daily_reach,
-          data.total_posts,
-          data.about,
-          data.country,
-          data.address,
-          data.previous_collaborations,
-      ];
+        const values = [
+            data.user_id,
+            data.company,
+            data.speciality,
+            data.daily_reach,
+            data.total_posts,
+            data.about,
+            data.country,
+            data.address,
+            data.previous_collaborations,
+        ];
 
-      const result = await dbClient.query(query, values);
+        const result = await dbClient.query(query, values);
 
-      if (result.rows.length > 0) {
-          return result.rows[0];
-      }
+        if (result.rows.length > 0) {
+            return result.rows[0];
+        }
 
-      return null;
-  } catch (error) {
-      throw error;
-  }
+        return null;
+    } catch (error) {
+        throw error;
+    }
 };
 
 
 // ****************************************GET CONTROLLER***************************************
 export const getUserProfileDetails = async (req: Request, res: Response) => {
     try {
+
+        //this check is already present in the middleware, still another layer 
+        if (!req.user) {
+            return res.status(401).json({ message: 'User not authenticated' });
+        }
         const { user_id } = req.query;
 
         const detail = await getUserProfileDetailsFromDB(user_id as string);
